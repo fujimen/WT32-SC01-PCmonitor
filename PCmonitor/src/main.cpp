@@ -44,7 +44,7 @@
 #include "ui/screens.h"
 #include "ui/actions.h"
 #include "ui/images.h"
-#include "HWMonitor/HwMonitor.h"
+#include "HWMonitor/HWMonitor.h"
 #include "SensorIndexes.h"
 #include "secret/secrets.h"
 
@@ -216,44 +216,62 @@ void my_touchpad_read(lv_indev_t *dev, lv_indev_data_t *data)
 }
 void displayCpuDetails()
 {
-    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", s_smooth.get(CPU_TEMPERATURE_CORE));
-    lv_bar_set_value(objects.bar_cpu_temperature, s_smooth.get(CPU_TEMPERATURE_CORE), LV_ANIM_OFF);
-    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", s_smooth.get(CPU_LOAD_CORE_MAX));
-    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", s_smooth.get(CPU_LOAD_TOTAL));
-    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f", s_smooth.get(CPU_PACKAGE));
+    const float temperature = s_smooth.get(CPU_TEMPERATURE_CORE);
+    const float loadCoreMax = s_smooth.get(CPU_LOAD_CORE_MAX);
+    const float loadTotal = s_smooth.get(CPU_LOAD_TOTAL);
+    const float power = s_smooth.get(CPU_PACKAGE);
+
+    lv_label_set_text_fmt(objects.label_cpu_temperature, "%.1f", temperature);
+    lv_bar_set_value(objects.bar_cpu_temperature, temperature, LV_ANIM_OFF);
+    lv_label_set_text_fmt(objects.label_cpu_load_core_max, "%.1f", loadCoreMax);
+    lv_label_set_text_fmt(objects.label_cpu_load_total, "%.1f", loadTotal);
+    lv_label_set_text_fmt(objects.label_cpu_power, "%.1f", power);
     lv_arc_set_value(objects.arc_cpu_load_core_max, s_smooth.getInt(CPU_LOAD_CORE_MAX));
     lv_arc_set_value(objects.arc_cpu_load_total, s_smooth.getInt(CPU_LOAD_TOTAL));
 }
 
 void displayGpuDetails()
 {
-    uint8_t hot_spot = s_smooth.getInt(GPU_TEMPERATURE_HOT_SPOT);
-    lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hot_spot, LV_ANIM_OFF);
-    lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, hot_spot - 3, LV_ANIM_OFF);
-    lv_bar_set_value(objects.bar_gpu_temp_core, s_smooth.getInt(GPU_TEMPERATURE_CORE), LV_ANIM_OFF);
+    int hotSpot = constrain(s_smooth.getInt(GPU_TEMPERATURE_HOT_SPOT), 0, 255);
+    int coreTemperature = s_smooth.getInt(GPU_TEMPERATURE_CORE);
+    int frameRate = constrain(s_smooth.getInt(GPU_FRAMERATE), 0, 1000);
+    int loadCore = s_smooth.getInt(GPU_LOAD_CORE);
+    int loadMemory = s_smooth.getInt(GPU_LOAD_MEMORY);
+
+    lv_bar_set_value(objects.bar_gpu_temp_hot_spot, hotSpot, LV_ANIM_OFF);
+    lv_bar_set_start_value(objects.bar_gpu_temp_hot_spot, max(hotSpot - 3, 0), LV_ANIM_OFF);
+    lv_bar_set_value(objects.bar_gpu_temp_core, coreTemperature, LV_ANIM_OFF);
     lv_label_set_text_fmt(objects.label_gpu_temp_core, "%.1f", s_smooth.get(GPU_TEMPERATURE_CORE));
-    lv_label_set_text_fmt(objects.label_gpu_framerate, "%d", s_smooth.getInt(GPU_FRAMERATE) > 1000 ? 1000 : s_smooth.getInt(GPU_FRAMERATE));
+    lv_label_set_text_fmt(objects.label_gpu_framerate, "%d", frameRate);
     lv_label_set_text_fmt(objects.label_gpu_power, "%.1f", s_smooth.get(GPU_PACKAGE));
     lv_label_set_text_fmt(objects.label_gpu_load_core, "%.1f", s_smooth.get(GPU_LOAD_CORE));
-    lv_arc_set_value(objects.arc_gpu_load_core, s_smooth.getInt(GPU_LOAD_CORE));
+    lv_arc_set_value(objects.arc_gpu_load_core, loadCore);
     lv_label_set_text_fmt(objects.label_gpu_load_memory, "%.1f", s_smooth.get(GPU_LOAD_MEMORY));
-    lv_arc_set_value(objects.arc_gpu_load_memory, s_smooth.getInt(GPU_LOAD_MEMORY));
+    lv_arc_set_value(objects.arc_gpu_load_memory, loadMemory);
 }
 
 void displayRamDetails()
 {
-    lv_label_set_text_fmt(objects.label_ram_used, "%.1f", s_smooth.get(RAM_USED));
-    lv_label_set_text_fmt(objects.label_ram_available, "%.1f", s_smooth.get(RAM_AVAILABLE));
-    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f", s_smooth.get(RAM_VIRTUAL_USED));
-    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f", s_smooth.get(RAM_VIRTUAL_AVAILABLE));
-    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", s_smooth.get(RAM_LOAD_MEMORY));
+    const float ramUsed = s_smooth.get(RAM_USED);
+    const float ramAvailable = s_smooth.get(RAM_AVAILABLE);
+    const float ramVirtualUsed = s_smooth.get(RAM_VIRTUAL_USED);
+    const float ramVirtualAvailable = s_smooth.get(RAM_VIRTUAL_AVAILABLE);
+    const float ramLoad = s_smooth.get(RAM_LOAD_MEMORY);
+    const float ramVirtualLoad = s_smooth.get(RAM_LOAD_VIRTUAL_MEMORY);
+
+    lv_label_set_text_fmt(objects.label_ram_used, "%.1f", ramUsed);
+    lv_label_set_text_fmt(objects.label_ram_available, "%.1f", ramAvailable);
+    lv_label_set_text_fmt(objects.label_ram_virtual_used, "%.1f", ramVirtualUsed);
+    lv_label_set_text_fmt(objects.label_ram_virtual_available, "%.1f", ramVirtualAvailable);
+    lv_label_set_text_fmt(objects.label_ram_percentage_details, "%.1f", ramLoad);
     lv_arc_set_value(objects.arc_ram_percentage_details, s_smooth.getInt(RAM_LOAD_MEMORY));
-    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", s_smooth.get(RAM_LOAD_VIRTUAL_MEMORY));
+    lv_label_set_text_fmt(objects.label_ram_percentage_virtual_details, "%.1f", ramVirtualLoad);
     lv_arc_set_value(objects.arc_ram_percentage_virtual_details, s_smooth.getInt(RAM_LOAD_VIRTUAL_MEMORY));
 }
 void updateRTC()
 {
-    if (WiFi.status() == WL_CONNECTED)
+    const bool connected = WiFi.status() == WL_CONNECTED;
+    if (connected)
     {
         Serial.println("Updating RTC with NTP server...");
         configTzTime(timeOffset, ntpServer);
@@ -262,9 +280,10 @@ void updateRTC()
 
 void displayTime()
 {
-    const lv_img_dsc_t *expectedImg = (WiFi.status() == WL_CONNECTED) ? &img_wifi : &img_no_wifi;
+    const bool connected = WiFi.status() == WL_CONNECTED;
+    const lv_img_dsc_t *expectedImg = connected ? &img_wifi : &img_no_wifi;
     lv_image_set_src(objects.obj0__wifi, expectedImg);
-    if (WiFi.status() != WL_CONNECTED)
+    if (!connected)
         return;
     struct tm timeinfo;
     if (!getLocalTime(&timeinfo))

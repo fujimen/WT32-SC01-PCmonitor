@@ -184,9 +184,6 @@ bool HWMonitor::processByte(uint8_t byte)
 
 void HWMonitor::_storeSensor()
 {
-    if (_currentSensor >= HW_MAX_SENSORS)
-        return;
-
     // Skip sensors with reserved IDs
     if (isReservedId(_tempId))
     {
@@ -205,10 +202,25 @@ void HWMonitor::_storeSensor()
     converter.b[2] = _tempValue[2];
     converter.b[3] = _tempValue[3];
 
-    _sensors[_currentSensor].id = _tempId;
-    _sensors[_currentSensor].value = converter.f;
-    _sensors[_currentSensor].valid = true;
-    _sensors[_currentSensor].timestamp = millis();
+    uint8_t sensorIndex = 0;
+    while (sensorIndex < sensorCount &&
+           _sensors[sensorIndex].id != _tempId)
+    {
+        sensorIndex++;
+    }
+
+    if (sensorIndex >= HW_MAX_SENSORS)
+        return;
+
+    _sensors[sensorIndex].id = _tempId;
+    _sensors[sensorIndex].value = converter.f;
+    _sensors[sensorIndex].valid = true;
+    _sensors[sensorIndex].timestamp = millis();
+
+    if (sensorIndex == sensorCount)
+    {
+        sensorCount++;
+    }
 
     // Call sensor callback if set
     if (_sensorCallback)
@@ -219,7 +231,6 @@ void HWMonitor::_storeSensor()
 
 bool HWMonitor::_finalizePacket()
 {
-    sensorCount = _currentSensor; // Actual count (may differ if reserved IDs skipped)
     lastUpdate = millis();
     packetsOK++;
 

@@ -104,14 +104,14 @@ public:
     {
         for (size_t i = 0; i < MAX_SENSORS; i++)
         {
-            m_ids[i] = 0xFF;
+            m_ids[i] = 0xFFFF;
         }
     }
 
     /**
      * @brief Ustaw wartość docelową dla sensora
      */
-    void setTarget(uint8_t sensorId, float value)
+    void setTarget(uint16_t sensorId, float value)
     {
         int idx = findOrCreate(sensorId);
         if (idx >= 0)
@@ -134,7 +134,7 @@ public:
     /**
      * @brief Pobierz wygładzoną wartość dla sensora
      */
-    float get(uint8_t sensorId, float defaultValue = 0.0f) const
+    float get(uint16_t sensorId, float defaultValue = 0.0f) const
     {
         int idx = find(sensorId);
         if (idx >= 0)
@@ -147,7 +147,7 @@ public:
     /**
      * @brief Pobierz wygładzoną wartość jako int
      */
-    int getInt(uint8_t sensorId, int defaultValue = 0) const
+    int getInt(uint16_t sensorId, int defaultValue = 0) const
     {
         int idx = find(sensorId);
         if (idx >= 0)
@@ -160,7 +160,7 @@ public:
     /**
      * @brief Zmień współczynnik wygładzania dla sensora
      */
-    void setSmoothing(uint8_t sensorId, float smoothing)
+    void setSmoothing(uint16_t sensorId, float smoothing)
     {
         int idx = find(sensorId);
         if (idx >= 0)
@@ -185,13 +185,13 @@ public:
         for (size_t i = 0; i < m_count; i++)
         {
             m_values[i].reset();
-            m_ids[i] = 0xFF;
+            m_ids[i] = 0xFFFF;
         }
         m_count = 0;
     }
 
 private:
-    int find(uint8_t sensorId) const
+    int find(uint16_t sensorId) const
     {
         for (size_t i = 0; i < m_count; i++)
         {
@@ -201,7 +201,7 @@ private:
         return -1;
     }
 
-    int findOrCreate(uint8_t sensorId)
+    int findOrCreate(uint16_t sensorId)
     {
         int idx = find(sensorId);
         if (idx >= 0)
@@ -217,7 +217,7 @@ private:
     }
 
     SmoothValue m_values[MAX_SENSORS];
-    uint8_t m_ids[MAX_SENSORS];
+    uint16_t m_ids[MAX_SENSORS];
     float m_defaultSmoothing;
     size_t m_count;
 };
